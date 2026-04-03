@@ -116,12 +116,12 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error("Analysis failed");
-      const { id } = await res.json();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Analysis failed");
       localStorage.removeItem(STORAGE_KEY);
-      router.push(`/results/${id}`);
-    } catch {
-      setError("Analysis failed — check your API keys and try again.");
+      router.push(`/results/${data.id}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Analysis failed — check your API keys and try again.");
       setIsLoading(false);
     } finally {
       clearInterval(interval);
