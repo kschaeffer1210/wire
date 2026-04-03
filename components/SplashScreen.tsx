@@ -132,7 +132,7 @@ export default function SplashScreen() {
             phase === "nav" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
           }`}
         >
-          <p className="text-center text-[10px] uppercase tracking-[0.22em] font-medium mb-4" style={{ color: "#3a373c" }}>
+          <p className="text-center text-[10px] uppercase tracking-[0.22em] font-medium mb-4" style={{ color: "#6a6570" }}>
             Where would you like to go?
           </p>
           <div className="flex flex-col gap-2.5 w-72">
