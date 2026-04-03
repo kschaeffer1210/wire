@@ -97,6 +97,35 @@ export interface IntakeFormData {
   buildPreference: BuildPreference;
 }
 
+export interface ReadinessDimension {
+  dimension: string;
+  score: number;
+  level: string;
+  summary: string;
+  findings: string[];
+  recommendation: string;
+}
+
+export interface ReadinessPhase {
+  phase: string;
+  title: string;
+  timeline: string;
+  actions: string[];
+}
+
+export interface AIReadinessAudit {
+  overall_score: number;
+  overall_level: string;
+  overall_summary: string;
+  dimensions: ReadinessDimension[];
+  top_blockers: string[];
+  quick_wins: string[];
+  phased_roadmap: ReadinessPhase[];
+  automation_fit_score: number;
+  automation_fit_rationale: string;
+  benchmark_context: string;
+}
+
 export interface WorkflowRecord {
   id: string;
   notionUrl: string;
