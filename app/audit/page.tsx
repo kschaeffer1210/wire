@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   ArrowLeft, ArrowRight, ShieldCheck, Loader2, CheckCircle2,
   AlertTriangle, ChevronRight, Lightbulb, XCircle,
-  TrendingUp, Calendar, Printer, RotateCcw, BarChart2,
+  TrendingUp, Calendar, Printer, RotateCcw, BarChart2, Bot,
 } from "lucide-react";
 import type {
   ClientProfile, AuditDimension, AuditQuestion,
@@ -14,7 +14,8 @@ import type {
 
 /* ─── Types ──────────────────────────────────────────────── */
 
-type Phase = "client-info" | "generating" | "answering" | "scoring" | "report";
+type AuditType = "readiness" | "agent";
+type Phase = "type-select" | "client-info" | "generating" | "answering" | "scoring" | "report";
 
 /* ─── Constants ──────────────────────────────────────────── */
 
@@ -269,7 +270,7 @@ function QuestionInput({
 
 /* ─── Printable Report ───────────────────────────────────── */
 
-function PrintableReport({ report }: { report: AuditReport }) {
+function PrintableReport({ report, auditType }: { report: AuditReport; auditType: AuditType }) {
   const cfg = getLvl(report.overall_level);
   const levels = ["Aware", "Exploring", "Implementing", "Scaling", "Transforming"];
   const levelNum = levels.indexOf(report.overall_level) + 1;
@@ -296,7 +297,9 @@ function PrintableReport({ report }: { report: AuditReport }) {
                   Workflow Intelligence &amp; ROI Engine
                 </span>
               </div>
-              <h1 className="text-2xl font-black text-white mb-1">AI Readiness Audit Report</h1>
+              <h1 className="text-2xl font-black text-white mb-1">
+                {auditType === "agent" ? "AI Agent Readiness Audit Report" : "AI Readiness Audit Report"}
+              </h1>
               <p className="text-sm" style={{ color: "#7a7580" }}>
                 Prepared for: <span className="text-white font-semibold">{report.client_name}</span>
                 &nbsp;&nbsp;·&nbsp;&nbsp;{report.client_industry}
@@ -513,10 +516,47 @@ function PrintableReport({ report }: { report: AuditReport }) {
   );
 }
 
+/* ─── Audit Type Selector ────────────────────────────────── */
+
+const AUDIT_TYPES: {
+  type: AuditType;
+  icon: React.ReactNode;
+  label: string;
+  tag?: string;
+  description: string;
+  dimensions: string[];
+  questions: string;
+  time: string;
+  forWhom: string;
+}[] = [
+  {
+    type: "readiness",
+    icon: <BarChart2 className="h-6 w-6" />,
+    label: "AI Readiness Audit",
+    description: "Assess whether an organization is ready to adopt and scale AI. Covers foundational strategy, data, technology, culture, and process.",
+    dimensions: ["Strategy & Leadership", "Data Readiness", "Technology", "People & Culture", "Governance", "Process Maturity", "Financial Readiness"],
+    questions: "35–40 questions",
+    time: "~15 min",
+    forWhom: "For orgs starting or scaling AI adoption",
+  },
+  {
+    type: "agent",
+    icon: <Bot className="h-6 w-6" />,
+    label: "AI Agent Readiness Audit",
+    tag: "NEW",
+    description: "Assess whether an organization can govern and control autonomous AI agents. Focuses on oversight, security, accountability, and lifecycle management.",
+    dimensions: ["Ownership & Accountability", "Security & Access Controls", "Lifecycle Management", "Governance & Compliance", "Human-in-the-Loop Design"],
+    questions: "20–25 questions",
+    time: "~10 min",
+    forWhom: "For orgs actively deploying AI agents",
+  },
+];
+
 /* ─── Main Page ──────────────────────────────────────────── */
 
 export default function AuditPage() {
-  const [phase, setPhase] = useState<Phase>("client-info");
+  const [phase, setPhase] = useState<Phase>("type-select");
+  const [auditType, setAuditType] = useState<AuditType>("readiness");
   const [profile, setProfile] = useState<ClientProfile>({
     clientName: "", industry: "", orgSize: "", goals: "", workflows: "", painPoints: "",
   });
@@ -535,8 +575,9 @@ export default function AuditPage() {
     if (!profile.clientName || !profile.industry || !profile.orgSize || !profile.goals) return;
     setPhase("generating");
     setError("");
+    const endpoint = auditType === "agent" ? "/api/audit/generate-agent" : "/api/audit/generate";
     try {
-      const res = await fetch("/api/audit/generate", {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profile),
@@ -579,7 +620,7 @@ export default function AuditPage() {
 
   /* ── Reset ── */
   function handleReset() {
-    setPhase("client-info");
+    setPhase("type-select");
     setProfile({ clientName: "", industry: "", orgSize: "", goals: "", workflows: "", painPoints: "" });
     setDimensions([]);
     setAnswers({});
@@ -613,11 +654,14 @@ export default function AuditPage() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#f0f9ff" }}>
-              <ShieldCheck className="h-5 w-5 text-sky-500" />
+              {auditType === "agent" ? <Bot className="h-5 w-5 text-sky-500" /> : <ShieldCheck className="h-5 w-5 text-sky-500" />}
             </div>
             <div>
-              <h1 className="text-2xl font-black text-gray-900 tracking-tight">AI Readiness Audit</h1>
+              <h1 className="text-2xl font-black text-gray-900 tracking-tight">
+                {phase === "type-select" ? "Audits" : auditType === "agent" ? "AI Agent Readiness Audit" : "AI Readiness Audit"}
+              </h1>
               <p className="text-sm text-gray-400">
+                {phase === "type-select" && "Choose the type of assessment to run"}
                 {phase === "client-info" && "Enter client info to generate a tailored assessment"}
                 {phase === "generating" && "Tailoring questions to your client..."}
                 {phase === "answering" && `${answeredCount} of ${totalQuestions} questions answered`}
@@ -628,11 +672,93 @@ export default function AuditPage() {
           </div>
         </div>
 
+        {/* ════════════════ PHASE 0: TYPE SELECT ════════════════ */}
+        {phase === "type-select" && (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500 leading-relaxed max-w-lg">
+              Two distinct assessments — choose based on where your client is in their AI journey.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {AUDIT_TYPES.map((at) => (
+                <button
+                  key={at.type}
+                  onClick={() => { setAuditType(at.type); setPhase("client-info"); }}
+                  className="text-left bg-white border border-gray-100 rounded-2xl shadow-sm p-6 hover:border-gray-300 hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div
+                      className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
+                      style={{ backgroundColor: "#f0f9ff", color: "#0284c7" }}
+                    >
+                      {at.icon}
+                    </div>
+                    {at.tag && (
+                      <span
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex-shrink-0"
+                        style={{ backgroundColor: "#fdf0f2", color: "#9a6570" }}
+                      >
+                        {at.tag}
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="font-bold text-gray-900 mb-1.5">{at.label}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed mb-4">{at.description}</p>
+
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {at.dimensions.map((d) => (
+                      <span key={d} className="text-[10px] px-2 py-0.5 rounded-full bg-gray-50 border border-gray-100 text-gray-500 font-medium">
+                        {d}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                      <span>{at.questions}</span>
+                      <span>·</span>
+                      <span>{at.time}</span>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-gray-300 group-hover:text-gray-600 transition-colors" />
+                  </div>
+
+                  <p className="text-[11px] text-gray-400 mt-2 italic">{at.forWhom}</p>
+                </button>
+              ))}
+            </div>
+
+            {/* Prereq note */}
+            <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex items-start gap-3">
+              <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-700 leading-relaxed">
+                <strong>Not sure which to choose?</strong> Start with the AI Readiness Audit.
+                The AI Agent Readiness Audit is most useful for orgs already deploying or evaluating autonomous agents —
+                it assumes a baseline level of AI maturity (typically &ldquo;Implementing&rdquo; or above).
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* ════════════════ PHASE 1: CLIENT INFO ════════════════ */}
         {phase === "client-info" && (
           <div className="space-y-5">
             <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
-              <h2 className="font-semibold text-gray-900 mb-5">Client Information</h2>
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="font-semibold text-gray-900">Client Information</h2>
+                <button
+                  onClick={() => setPhase("type-select")}
+                  className="text-xs text-gray-400 hover:text-gray-700 flex items-center gap-1 transition-colors"
+                >
+                  <ArrowLeft className="h-3 w-3" />
+                  Change audit type
+                </button>
+              </div>
+              <div className="flex items-center gap-2 mb-5 px-3 py-2 rounded-lg border" style={{ backgroundColor: "#f0f9ff", borderColor: "#bae6fd" }}>
+                <ShieldCheck className="h-4 w-4 text-sky-500 flex-shrink-0" />
+                <p className="text-xs text-sky-700 font-medium">
+                  {auditType === "agent" ? "AI Agent Readiness Audit — 5 dimensions · 20–25 questions" : "AI Readiness Audit — 7 dimensions · 35–40 questions"}
+                </p>
+              </div>
               <div className="space-y-4">
 
                 <div>
@@ -691,13 +817,17 @@ export default function AuditPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                    Specific workflows or processes they want to automate
-                    <span className="text-gray-400 normal-case font-normal ml-1">(optional)</span>
+                    {auditType === "agent"
+                      ? <>AI agents being deployed or evaluated <span className="text-gray-400 normal-case font-normal ml-1">(e.g. Copilot, custom LLM agents)</span></>
+                      : <>Specific workflows or processes they want to automate <span className="text-gray-400 normal-case font-normal ml-1">(optional)</span></>
+                    }
                   </label>
                   <textarea
                     className="wire-input resize-none"
                     rows={2}
-                    placeholder="e.g. Invoice processing, client intake forms, weekly reporting..."
+                    placeholder={auditType === "agent"
+                      ? "e.g. Microsoft Copilot Studio agents, SharePoint agents, custom OpenAI assistants..."
+                      : "e.g. Invoice processing, client intake forms, weekly reporting..."}
                     value={profile.workflows}
                     onChange={(e) => setProfile((p) => ({ ...p, workflows: e.target.value }))}
                   />
@@ -727,7 +857,9 @@ export default function AuditPage() {
             )}
 
             <div className="flex justify-between items-center">
-              <p className="text-xs text-gray-400">35–40 tailored questions · ~15 min to complete</p>
+              <p className="text-xs text-gray-400">
+                {auditType === "agent" ? "20–25 tailored questions · ~10 min" : "35–40 tailored questions · ~15 min"}
+              </p>
               <button
                 onClick={handleGenerateQuestions}
                 disabled={!profile.clientName || !profile.industry || !profile.orgSize || !profile.goals}
@@ -751,7 +883,10 @@ export default function AuditPage() {
               to match {profile.clientName}&apos;s profile and goals.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-2">
-              {["Strategy & Leadership","Data Readiness","Technology","People & Culture","Governance","Process Maturity","Financial Readiness"].map((d) => (
+              {(auditType === "agent"
+                ? ["Ownership & Accountability","Security & Access Controls","Lifecycle Management","Governance & Compliance","Human-in-the-Loop Design"]
+                : ["Strategy & Leadership","Data Readiness","Technology","People & Culture","Governance","Process Maturity","Financial Readiness"]
+              ).map((d) => (
                 <span key={d} className="text-xs px-2.5 py-1 bg-gray-50 border border-gray-100 rounded-full text-gray-400 animate-pulse">
                   {d}
                 </span>
@@ -932,7 +1067,7 @@ export default function AuditPage() {
             </div>
 
             <div ref={reportRef}>
-              <PrintableReport report={report} />
+              <PrintableReport report={report} auditType={auditType} />
             </div>
           </div>
         )}
