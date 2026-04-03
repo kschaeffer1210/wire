@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { analyzeWorkflow } from "@/lib/anthropic";
 import { createWorkflowPage } from "@/lib/notion";
