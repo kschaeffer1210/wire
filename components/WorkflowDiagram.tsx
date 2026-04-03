@@ -155,10 +155,10 @@ function DiamondNode({ node, index }: { node: FlowNode; index: number }) {
 /* ─── Edge renderer ─────────────────────────────────────────── */
 
 function Edge({
-  fromIdx, toIdx, fromType, toType, label,
+  fromIdx, toIdx, fromType, label,
 }: {
   fromIdx: number; toIdx: number;
-  fromType: FlowNodeType; toType: FlowNodeType;
+  fromType: FlowNodeType; toType?: FlowNodeType;
   label?: string;
 }) {
   const x1 = CX;

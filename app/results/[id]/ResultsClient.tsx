@@ -118,7 +118,7 @@ function formatCurrency(n: number) {
 
 /* ─── Category icon map ──────────────────────────────────── */
 
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+const _CATEGORY_ICONS: Record<string, React.ReactNode> = { // eslint-disable-line @typescript-eslint/no-unused-vars
   "AI Model":    <Cpu className="h-3.5 w-3.5" />,
   Automation:    <Zap className="h-3.5 w-3.5" />,
   Integration:   <Plug className="h-3.5 w-3.5" />,
