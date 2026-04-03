@@ -1,7 +1,7 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { getAllWorkflows } from "@/lib/notion";
-
-export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {

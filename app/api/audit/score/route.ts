@@ -1,8 +1,9 @@
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import type { ClientProfile, AuditDimension, AuditReport } from "@/lib/types";
-
-export const maxDuration = 60;
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
