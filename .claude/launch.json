@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "wire",
+      "runtimeExecutable": "/usr/local/bin/node",
+      "runtimeArgs": ["/usr/local/bin/npm", "run", "dev", "--prefix", "/Users/kellyschaeffer/OpenClaw/wire"],
+      "port": 3000
+    }
+  ]
+}
