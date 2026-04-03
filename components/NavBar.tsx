@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Settings } from "lucide-react";
+import { Settings, ShieldCheck } from "lucide-react";
 
 function WMark({ size = 16, color = "white" }: { size?: number; color?: string }) {
   return (
@@ -40,6 +40,10 @@ export default function NavBar() {
             </Link>
             <Link href="/projects" className="wire-nav-link px-3 py-1.5 rounded-md text-sm font-medium transition-colors">
               Project Hub
+            </Link>
+            <Link href="/audit" className="wire-nav-link px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              AI Readiness Audit
             </Link>
             <Link href="/setup" className="wire-nav-icon p-1.5 rounded-md transition-colors" title="Setup & connection status">
               <Settings className="h-4 w-4" />

@@ -71,6 +71,84 @@ export interface BuildGuide {
   total_build_time: string;
 }
 
+/* ─── AI Readiness Audit ─────────────────────────────────── */
+
+export interface ClientProfile {
+  clientName: string;
+  industry: string;
+  orgSize: string;
+  goals: string;
+  workflows: string;
+  painPoints: string;
+}
+
+export interface AuditQuestionOption {
+  label: string;
+  score: number; // 0-100
+}
+
+export interface AuditQuestion {
+  id: string;
+  dimension_id: string;
+  question: string;
+  type: "scale" | "yes_no" | "multiple_choice" | "text";
+  options?: AuditQuestionOption[];
+  scale_labels?: { low: string; high: string };
+  weight: number; // 1.0 or 1.5 for high-signal questions
+  hint?: string;
+}
+
+export interface AuditDimension {
+  id: string;
+  name: string;
+  weight: number; // dimension weight multiplier (1.0, 1.25, or 1.5)
+  questions: AuditQuestion[];
+}
+
+export interface AuditDimensionResult {
+  dimension: string;
+  score: number; // 0-100
+  level: string;
+  summary: string;
+  strengths: string[];
+  gaps: string[];
+  recommendation: string;
+}
+
+export interface AuditBlocker {
+  title: string;
+  detail: string;
+  priority: "critical" | "high" | "medium";
+}
+
+export interface AuditQuickWin {
+  action: string;
+  impact: string;
+  timeline: string;
+}
+
+export interface AuditRoadmapPhase {
+  phase: string;
+  title: string;
+  timeline: string;
+  actions: string[];
+}
+
+export interface AuditReport {
+  client_name: string;
+  client_industry: string;
+  audit_date: string;
+  overall_score: number; // 0-100
+  overall_level: string;
+  executive_summary: string;
+  dimensions: AuditDimensionResult[];
+  top_blockers: AuditBlocker[];
+  quick_wins: AuditQuickWin[];
+  roadmap: AuditRoadmapPhase[];
+  benchmark_context: string;
+  recommended_starting_point: string;
+}
+
 export interface AIAnalysis {
   summary: string;
   solution_type: SolutionType;
