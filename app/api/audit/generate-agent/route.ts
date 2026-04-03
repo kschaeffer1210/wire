@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
     const profile: ClientProfile = await req.json();
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-5",
       max_tokens: 6000,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: buildPrompt(profile) }],

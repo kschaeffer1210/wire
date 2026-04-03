@@ -68,9 +68,6 @@ export async function createWorkflowPage(
       Roadmap: {
         rich_text: richText(JSON.stringify(analysis.phases)),
       },
-      "Build Spec": {
-        rich_text: richText(JSON.stringify(analysis.build_spec ?? null)),
-      },
       "Hourly Rate": { number: intake.hourlyRate },
     },
   });
