@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import type { ClientProfile } from "@/lib/types";
 
+export const maxDuration = 60;
+
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const SYSTEM_PROMPT = `You are a senior AI governance consultant specializing in agentic AI systems. You assess whether organizations can govern and control autonomous AI agents — not whether they're ready to start using AI, but whether they can responsibly manage AI that acts on its own.

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getWorkflowPage } from "@/lib/notion";
 
+export const maxDuration = 60;
+
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const SYSTEM_PROMPT = `You are a senior AI readiness consultant who has conducted hundreds of workflow automation assessments. Your job is to audit a specific submitted workflow — not the organization broadly — and produce a rigorous, honest, workflow-specific AI readiness report.

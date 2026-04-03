@@ -3,6 +3,8 @@ import { analyzeWorkflow } from "@/lib/anthropic";
 import { createWorkflowPage } from "@/lib/notion";
 import type { IntakeFormData } from "@/lib/types";
 
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

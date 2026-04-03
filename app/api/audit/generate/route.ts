@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import type { ClientProfile } from "@/lib/types";
 
+export const maxDuration = 60;
+
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const SYSTEM_PROMPT = `You are a senior AI readiness consultant who has assessed hundreds of organizations. Your task is to generate a tailored set of 35–40 AI readiness audit questions for a specific client.
